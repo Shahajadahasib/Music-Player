@@ -1,72 +1,59 @@
 import 'dart:developer';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:music/provider.dart';
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:provider/provider.dart';
 import 'audio.dart';
 import 'permissio.dart';
 
-class AudioList extends StatelessWidget {
+class AudioList extends StatefulWidget {
   AudioList({Key? key}) : super(key: key);
-  final OnAudioQuery _audioQuery = OnAudioQuery();
-  AudioPlayer player = AudioPlayer();
+
+  @override
+  State<AudioList> createState() => _AudioListState();
+}
+
+class _AudioListState extends State<AudioList> {
   @override
   Widget build(BuildContext context) {
+    context.read<AudioProvider>().fetchAudioList;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Music Player"),
         elevation: 2,
       ),
       body: PermissionSettings.isPermit
-          ? FutureBuilder<List<SongModel>>(
-              // Default values:
-              future: _audioQuery.querySongs(
-                sortType: SongSortType.TITLE,
-                orderType: OrderType.ASC_OR_SMALLER,
-                uriType: UriType.EXTERNAL,
-                ignoreCase: true,
-              ),
-              builder: (context, item) {
-                // Loading content
-                if (item.data == null) return const CircularProgressIndicator();
-
-                // When you try "query" without asking for [READ] or [Library] permission
-                // the plugin will return a [Empty] list.
-                if (item.data!.isEmpty) return const Text("Nothing found!");
-
-                // You can use [item.data!] direct or you can create a:
-                // List<SongModel> songs = item.data!;
-                return ListView.builder(
-                  itemCount: item.data!.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        log(item.data![index].toString());
-                        log(item.data![index].isMusic.toString());
-                        // Navigator.pushNamed(context, Audio.routeName,
-                        //     arguments: item.data![index]);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Audio(
-                              song: item.data![index],
-                              advancedPlayer: player,
-                            ),
-                          ),
-                        );
-                      },
-                      child: ListTile(
-                        title: Text(item.data![index].title),
-                        subtitle: Text(item.data![index].artist ?? "No Artist"),
-                        trailing: const Icon(Icons.arrow_forward_rounded),
-                        // This Widget will query/load image. Just add the id and type.
-                        // You can use/create your own widget/method using [queryArtwork].
-                        leading: QueryArtworkWidget(
-                          id: item.data![index].id,
-                          type: ArtworkType.AUDIO,
-                        ),
+          ? ListView.builder(
+              itemCount: context.read<AudioProvider>().audioList.length,
+              itemBuilder: (context, index) {
+                return InkWell(
+                  onTap: () async {
+                    context.read<AudioProvider>().currentSongIndex = index;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Audio(),
                       ),
                     );
+                    // await await context.read<AudioProvider>().playAudio(player);
                   },
+                  child: ListTile(
+                    title: Text(
+                        context.watch<AudioProvider>().audioList[index].title),
+                    subtitle: Text(context
+                            .watch<AudioProvider>()
+                            .audioList[index]
+                            .artist ??
+                        "No Artist"),
+                    trailing: const Icon(Icons.arrow_forward_rounded),
+                    // This Widget will query/load image. Just add the id and type.
+                    // You can use/create your own widget/method using [queryArtwork].
+                    leading: QueryArtworkWidget(
+                      id: context.watch<AudioProvider>().audioList[index].id,
+                      type: ArtworkType.AUDIO,
+                    ),
+                  ),
                 );
               },
             )

@@ -2,14 +2,21 @@ import 'dart:developer';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:music/provider.dart';
 
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:provider/provider.dart';
 
 class Audio extends StatefulWidget {
-  final SongModel song;
-  final AudioPlayer advancedPlayer;
-  const Audio({Key? key, required this.advancedPlayer, required this.song})
-      : super(key: key);
+  // final SongModel song;
+  // final AudioPlayer advancedPlayer;
+  // final VoidCallback ontap;
+  const Audio({
+    Key? key,
+    // required this.advancedPlayer,
+    // required this.song,
+    // required this.ontap,
+  }) : super(key: key);
 
   @override
   State<Audio> createState() => _AudioState();
@@ -27,7 +34,7 @@ class _AudioState extends State<Audio> {
 
   Future<void> setSource(Source source) async {
     setState(() => isSourceSet = false);
-    await widget.advancedPlayer.setSource(source);
+    await context.read<AudioProvider>().advancedPlayer.setSource(source);
     setState(() => isSourceSet = true);
   }
 
@@ -35,18 +42,22 @@ class _AudioState extends State<Audio> {
   void initState() {
     super.initState();
 
-    widget.advancedPlayer.onDurationChanged.listen((d) {
+    context.read<AudioProvider>().advancedPlayer.onDurationChanged.listen((d) {
       setState(() {
         _duration = d;
       });
     });
-    widget.advancedPlayer.onPositionChanged.listen((p) {
+    context.read<AudioProvider>().advancedPlayer.onPositionChanged.listen((p) {
       setState(() {
         _position = p;
       });
     });
 
-    widget.advancedPlayer.onPlayerComplete.listen((event) {
+    context
+        .read<AudioProvider>()
+        .advancedPlayer
+        .onPlayerComplete
+        .listen((event) {
       setState(() {
         _position = const Duration(seconds: 0);
         if (isRepeat == true) {
@@ -76,20 +87,24 @@ class _AudioState extends State<Audio> {
 
   @override
   void dispose() {
-    widget.advancedPlayer.dispose();
-    widget.advancedPlayer.release();
+    context.read<AudioProvider>().advancedPlayer.dispose();
+    context.read<AudioProvider>().advancedPlayer.release();
     super.dispose();
   }
 
   void changeToSecond(int second) {
     Duration newDuration = Duration(seconds: second);
-    widget.advancedPlayer.seek(newDuration);
+    context.read<AudioProvider>().advancedPlayer.seek(newDuration);
   }
 
   @override
   Widget build(BuildContext context) {
-    SongModel songurl = widget.song;
-    final songdata = widget.song.data;
+    // context.read<AudioProvider>().playAudio(advancedPlayer);
+    var song = context
+        .watch<AudioProvider>()
+        .audioList[context.watch<AudioProvider>().currentSongIndex];
+    SongModel songurl = song;
+    // final songdata = song.data;
 
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -182,14 +197,18 @@ class _AudioState extends State<Audio> {
                           IconButton(
                             onPressed: () {
                               if (isRepeat == false) {
-                                widget.advancedPlayer
+                                context
+                                    .read<AudioProvider>()
+                                    .advancedPlayer
                                     .setReleaseMode(ReleaseMode.loop);
                                 setState(() {
                                   isRepeat = true;
                                   color = Colors.blue;
                                 });
                               } else if (isRepeat == true) {
-                                widget.advancedPlayer
+                                context
+                                    .read<AudioProvider>()
+                                    .advancedPlayer
                                     .setReleaseMode(ReleaseMode.release);
                                 color = Colors.blue;
                                 isRepeat = false;
@@ -201,7 +220,10 @@ class _AudioState extends State<Audio> {
                           ),
                           IconButton(
                             onPressed: () {
-                              widget.advancedPlayer.setPlaybackRate(1);
+                              context
+                                  .read<AudioProvider>()
+                                  .advancedPlayer
+                                  .setPlaybackRate(1);
                             },
                             icon: const Icon(
                               Icons.slow_motion_video_outlined,
@@ -211,16 +233,18 @@ class _AudioState extends State<Audio> {
                             onPressed: () async {
                               if (isPlaying == false) {
                                 log(songurl.data);
-
-                                await widget.advancedPlayer
-                                    .play(UrlSource(songdata));
+                                context.read<AudioProvider>().playAudio();
+                                // await advancedPlayer.play(UrlSource(songdata));
                                 setState(
                                   () {
                                     isPlaying = true;
                                   },
                                 );
                               } else if (isPlaying == true) {
-                                widget.advancedPlayer.pause();
+                                context
+                                    .read<AudioProvider>()
+                                    .advancedPlayer
+                                    .pause();
                                 setState(
                                   () {
                                     isPlaying = false;
@@ -234,7 +258,13 @@ class _AudioState extends State<Audio> {
                           ),
                           IconButton(
                             onPressed: () {
-                              widget.advancedPlayer.audioCache;
+                              // widget.advancedPlayer.audioCache;
+                              context.read<AudioProvider>().changeSong(context
+                                  .read<AudioProvider>()
+                                  .currentSongIndex);
+                              // widget.advancedPlayer.play(
+                              //   UrlSource(),
+                              // );
                             },
                             icon: const Icon(
                               Icons.forward_outlined,

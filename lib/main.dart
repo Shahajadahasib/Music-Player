@@ -1,4 +1,7 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:music/provider.dart';
+import 'package:provider/provider.dart';
 
 import 'audiolist.dart';
 import 'permissio.dart';
@@ -32,10 +35,21 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Music Player',
-      home: AudioList(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => AudioProvider(
+            advancedPlayer: AudioPlayer(),
+          ),
+        ),
+      ],
+      builder: (context, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Music Player',
+          home: AudioList(),
+        );
+      },
     );
   }
 }
