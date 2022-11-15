@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -25,7 +23,6 @@ class AudioProvider with ChangeNotifier {
   int get currentSongIndex => _currentSongIndex;
   set currentSongIndex(int index) {
     _currentSongIndex = index;
-    log("Current index  = $index");
     playAudio();
     notifyListeners();
   }
@@ -40,25 +37,20 @@ class AudioProvider with ChangeNotifier {
         uriType: UriType.EXTERNAL,
         ignoreCase: true,
       );
-      log('message');
     } catch (e) {
       print(e);
     }
     notifyListeners();
   }
 
-  changeSong(int songindex) {
+  nextSong(int songindex) {
     if (_currentSongIndex == _audioList.length - 1) {
       _currentSongIndex = 0;
-      log("Chnage song index  = $_currentSongIndex");
-      log('No songs left');
     } else {
       _currentSongIndex = songindex + 1;
-      log("Chnage song index  = $songindex");
-      log("Current song index  = $_currentSongIndex");
-      log("_audioList.length = ${_audioList.length}");
     }
-
+    _position = Duration.zero;
+    _duration = Duration.zero;
     playAudio();
     notifyListeners();
   }
@@ -68,5 +60,43 @@ class AudioProvider with ChangeNotifier {
       UrlSource(_audioList[_currentSongIndex].data),
     );
     _isPLaying = true;
+    await playerdurationchanged();
+    await playerPositionchanged();
+    notifyListeners();
+  }
+
+  void seekslider(int second) async {
+    Duration newDuration = Duration(seconds: second);
+    await advancedPlayer.seek(newDuration);
+    _position = newDuration;
+    notifyListeners();
+  }
+
+  Duration _duration = const Duration();
+  Duration get duration => _duration;
+  set duration(Duration duration) {
+    _duration = duration;
+    notifyListeners();
+  }
+
+  Duration _position = const Duration();
+  Duration get position => _position;
+  set position(Duration duration) {
+    _position = duration;
+    notifyListeners();
+  }
+
+  playerdurationchanged() {
+    advancedPlayer.onDurationChanged.listen((event) {
+      _duration = event;
+      notifyListeners();
+    });
+  }
+
+  playerPositionchanged() {
+    advancedPlayer.onPositionChanged.listen((event) {
+      _position = event;
+      notifyListeners();
+    });
   }
 }
