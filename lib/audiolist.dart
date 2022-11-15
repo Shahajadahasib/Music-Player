@@ -1,5 +1,3 @@
-import 'dart:developer';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:music/provider.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -7,14 +5,9 @@ import 'package:provider/provider.dart';
 import 'audio.dart';
 import 'permissio.dart';
 
-class AudioList extends StatefulWidget {
-  AudioList({Key? key}) : super(key: key);
+class AudioList extends StatelessWidget {
+  const AudioList({Key? key}) : super(key: key);
 
-  @override
-  State<AudioList> createState() => _AudioListState();
-}
-
-class _AudioListState extends State<AudioList> {
   @override
   Widget build(BuildContext context) {
     context.read<AudioProvider>().fetchAudioList;
@@ -36,7 +29,6 @@ class _AudioListState extends State<AudioList> {
                         builder: (context) => const Audio(),
                       ),
                     );
-                    // await await context.read<AudioProvider>().playAudio(player);
                   },
                   child: ListTile(
                     title: Text(
