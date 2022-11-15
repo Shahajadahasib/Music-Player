@@ -9,18 +9,14 @@ class AudioProvider with ChangeNotifier {
   AudioProvider({
     Key? key,
     required this.advancedPlayer,
-    // required this.song,
-    // required this.ontap,
   });
 
   final OnAudioQuery _audioQuery = OnAudioQuery();
   List<SongModel> _audioList = [];
-  int _nextSongIndex = 0;
-
-  int get nextSongIndex => _nextSongIndex;
-  set nextSongIndex(int index) {
-    _nextSongIndex = index;
-    log("Next index  = $index");
+  bool _isPLaying = false;
+  bool get isPlaying => _isPLaying;
+  set isPlaying(bool value) {
+    _isPLaying = value;
     notifyListeners();
   }
 
@@ -51,13 +47,18 @@ class AudioProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  //  SongModel song =  ;
-
   changeSong(int songindex) {
-    // int heda = _audioList.indexOf(09);
-    // nextSongIndex = heda + 1;
-    _currentSongIndex = songindex + 1;
-    log("Chnage song index  = $_currentSongIndex");
+    if (_currentSongIndex == _audioList.length - 1) {
+      _currentSongIndex = 0;
+      log("Chnage song index  = $_currentSongIndex");
+      log('No songs left');
+    } else {
+      _currentSongIndex = songindex + 1;
+      log("Chnage song index  = $songindex");
+      log("Current song index  = $_currentSongIndex");
+      log("_audioList.length = ${_audioList.length}");
+    }
+
     playAudio();
     notifyListeners();
   }
@@ -66,5 +67,6 @@ class AudioProvider with ChangeNotifier {
     await advancedPlayer.play(
       UrlSource(_audioList[_currentSongIndex].data),
     );
+    _isPLaying = true;
   }
 }

@@ -1,21 +1,12 @@
-import 'dart:developer';
-
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:music/provider.dart';
 
-import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
 
 class Audio extends StatefulWidget {
-  // final SongModel song;
-  // final AudioPlayer advancedPlayer;
-  // final VoidCallback ontap;
   const Audio({
     Key? key,
-    // required this.advancedPlayer,
-    // required this.song,
-    // required this.ontap,
   }) : super(key: key);
 
   @override
@@ -26,17 +17,8 @@ class _AudioState extends State<Audio> {
   Duration _duration = const Duration();
   Duration _position = const Duration();
 
-  bool isPlaying = false;
-  bool isPaused = false;
   bool isRepeat = false;
   Color color = Colors.black;
-  bool isSourceSet = false;
-
-  Future<void> setSource(Source source) async {
-    setState(() => isSourceSet = false);
-    await context.read<AudioProvider>().advancedPlayer.setSource(source);
-    setState(() => isSourceSet = true);
-  }
 
   @override
   void initState() {
@@ -61,9 +43,9 @@ class _AudioState extends State<Audio> {
       setState(() {
         _position = const Duration(seconds: 0);
         if (isRepeat == true) {
-          isPlaying = true;
+          context.read<AudioProvider>().isPlaying = true;
         } else {
-          isPlaying = false;
+          context.read<AudioProvider>().isPlaying = false;
           isRepeat = false;
         }
       });
@@ -99,16 +81,10 @@ class _AudioState extends State<Audio> {
 
   @override
   Widget build(BuildContext context) {
-    // context.read<AudioProvider>().playAudio(advancedPlayer);
     var song = context
         .watch<AudioProvider>()
         .audioList[context.watch<AudioProvider>().currentSongIndex];
-    SongModel songurl = song;
-    // final songdata = song.data;
-
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double screenWidth = MediaQuery.of(context).size.width;
-
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: const Color(0xFfdee7fa),
       body: Stack(
@@ -117,7 +93,7 @@ class _AudioState extends State<Audio> {
             top: 0,
             left: 0,
             right: 0,
-            height: screenHeight / 3,
+            height: size.height / 3,
             child: Container(
               color: const Color(0xFF04abe7),
             ),
@@ -140,10 +116,10 @@ class _AudioState extends State<Audio> {
             ),
           ),
           Positioned(
-            top: screenHeight * 0.2,
+            top: size.height * 0.2,
             left: 0,
             right: 0,
-            height: screenHeight * 0.40,
+            height: size.height * 0.40,
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(40),
@@ -152,17 +128,17 @@ class _AudioState extends State<Audio> {
               child: Column(
                 children: [
                   SizedBox(
-                    height: screenHeight * 0.1,
+                    height: size.height * 0.1,
                   ),
                   Text(
-                    songurl.title,
+                    song.title,
                     style: const TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Avenir'),
                   ),
                   Text(
-                    songurl.artist!,
+                    song.artist!,
                     style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -231,29 +207,23 @@ class _AudioState extends State<Audio> {
                           ),
                           IconButton(
                             onPressed: () async {
-                              if (isPlaying == false) {
-                                log(songurl.data);
-                                context.read<AudioProvider>().playAudio();
-                                // await advancedPlayer.play(UrlSource(songdata));
-                                setState(
-                                  () {
-                                    isPlaying = true;
-                                  },
-                                );
-                              } else if (isPlaying == true) {
-                                context
+                              if (context.read<AudioProvider>().isPlaying) {
+                                await context
                                     .read<AudioProvider>()
                                     .advancedPlayer
                                     .pause();
-                                setState(
-                                  () {
-                                    isPlaying = false;
-                                  },
-                                );
+
+                                context.read<AudioProvider>().isPlaying = false;
+                              } else {
+                                // log(songurl.data);
+                                await context.read<AudioProvider>().playAudio();
+                                context.read<AudioProvider>().isPlaying = true;
                               }
                             },
                             icon: Icon(
-                              isPlaying ? Icons.pause : Icons.play_arrow,
+                              context.watch<AudioProvider>().isPlaying
+                                  ? Icons.pause
+                                  : Icons.play_arrow,
                             ),
                           ),
                           IconButton(
@@ -285,10 +255,10 @@ class _AudioState extends State<Audio> {
             ),
           ),
           Positioned(
-            top: screenHeight * 0.12,
-            left: (screenWidth - 150) / 2,
-            right: (screenWidth - 150) / 2,
-            height: screenHeight * 0.16,
+            top: size.height * 0.12,
+            left: (size.width - 150) / 2,
+            right: (size.width - 150) / 2,
+            height: size.height * 0.16,
             child: Container(
               decoration: BoxDecoration(
                 color: const Color(0xFFf2f2f2),
