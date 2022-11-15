@@ -14,76 +14,26 @@ class Audio extends StatefulWidget {
 }
 
 class _AudioState extends State<Audio> {
-  Duration _duration = const Duration();
-  Duration _position = const Duration();
-
   bool isRepeat = false;
   Color color = Colors.black;
 
-  @override
-  void initState() {
-    super.initState();
-
-    context.read<AudioProvider>().advancedPlayer.onDurationChanged.listen((d) {
-      setState(() {
-        _duration = d;
-      });
-    });
-    context.read<AudioProvider>().advancedPlayer.onPositionChanged.listen((p) {
-      setState(() {
-        _position = p;
-      });
-    });
-
-    context
-        .read<AudioProvider>()
-        .advancedPlayer
-        .onPlayerComplete
-        .listen((event) {
-      setState(() {
-        _position = const Duration(seconds: 0);
-        if (isRepeat == true) {
-          context.read<AudioProvider>().isPlaying = true;
-        } else {
-          context.read<AudioProvider>().isPlaying = false;
-          isRepeat = false;
-        }
-      });
-    });
-  }
-
   Widget slider() {
     return Slider(
-        value: _position.inSeconds.toDouble(),
+        value: context.watch<AudioProvider>().position.inSeconds.toDouble(),
         activeColor: Colors.red,
         inactiveColor: Colors.grey,
         min: 0.0,
-        max: _duration.inSeconds.toDouble(),
+        max: context.watch<AudioProvider>().duration.inSeconds.toDouble(),
         onChanged: (double value) {
-          setState(() {
-            changeToSecond(value.toInt());
-            value = value;
-          });
+          context.read<AudioProvider>().seekslider(value.toInt());
         });
   }
 
   @override
-  void dispose() {
-    context.read<AudioProvider>().advancedPlayer.dispose();
-    context.read<AudioProvider>().advancedPlayer.release();
-    super.dispose();
-  }
-
-  void changeToSecond(int second) {
-    Duration newDuration = Duration(seconds: second);
-    context.read<AudioProvider>().advancedPlayer.seek(newDuration);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    var song = context
-        .watch<AudioProvider>()
-        .audioList[context.watch<AudioProvider>().currentSongIndex];
+    var songindex = context.watch<AudioProvider>().currentSongIndex;
+    var song = context.watch<AudioProvider>().audioList[songindex];
+
     final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: const Color(0xFfdee7fa),
@@ -155,11 +105,19 @@ class _AudioState extends State<Audio> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              _position.toString().split(".")[0],
+                              context
+                                  .watch<AudioProvider>()
+                                  .position
+                                  .toString()
+                                  .split(".")[0],
                               style: const TextStyle(fontSize: 16),
                             ),
                             Text(
-                              _duration.toString().split(".")[0],
+                              context
+                                  .watch<AudioProvider>()
+                                  .duration
+                                  .toString()
+                                  .split(".")[0],
                               style: const TextStyle(fontSize: 16),
                             )
                           ],
@@ -229,7 +187,7 @@ class _AudioState extends State<Audio> {
                           IconButton(
                             onPressed: () {
                               // widget.advancedPlayer.audioCache;
-                              context.read<AudioProvider>().changeSong(context
+                              context.read<AudioProvider>().nextSong(context
                                   .read<AudioProvider>()
                                   .currentSongIndex);
                               // widget.advancedPlayer.play(
