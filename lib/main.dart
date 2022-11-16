@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:music/provider.dart';
@@ -19,6 +21,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  PermissionProvider permissionProvider = PermissionProvider();
   @override
   void initState() {
     checkPermission();
@@ -26,15 +29,14 @@ class _MyAppState extends State<MyApp> {
   }
 
   void checkPermission() async {
-    final status = PermissionSettings.isPermit;
-    if (status == false) {
-      await PermissionSettings.promptPermissionSetting();
+    if (permissionProvider.isPermit == false) {
+      await permissionProvider.promptPermissionSetting();
     }
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    log('main');
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
@@ -42,9 +44,12 @@ class _MyAppState extends State<MyApp> {
             advancedPlayer: AudioPlayer(),
           ),
         ),
+        ChangeNotifierProvider(
+          create: (context) => permissionProvider,
+        )
       ],
       builder: (context, child) {
-        return MaterialApp(
+        return const MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Music Player',
           home: AudioList(),

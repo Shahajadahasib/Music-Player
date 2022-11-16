@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -37,9 +39,12 @@ class AudioProvider with ChangeNotifier {
         uriType: UriType.EXTERNAL,
         ignoreCase: true,
       );
+      // notifyListeners();
     } catch (e) {
       print(e);
     }
+    log(_audioList.length.toString());
+    log('message');
     notifyListeners();
   }
 
