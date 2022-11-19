@@ -81,14 +81,18 @@ class _AudioState extends State<Audio> {
                     height: size.height * 0.1,
                   ),
                   Text(
-                    song.title,
+                    song.title.length > 15
+                        ? song.title.substring(0, 15)
+                        : song.title.toString(),
                     style: const TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Avenir'),
                   ),
                   Text(
-                    song.artist!,
+                    song.artist.toString().length > 20
+                        ? song.artist.toString().substring(0, 20)
+                        : song.artist.toString(),
                     style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -237,10 +241,11 @@ class _AudioState extends State<Audio> {
                       width: 3,
                     ),
                     image: const DecorationImage(
-                        image: NetworkImage(
-                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShyQTVUKweEjyekXS8dOcHmXOtmqOFBEPUKQ&usqp=CAU',
-                        ),
-                        fit: BoxFit.cover),
+                      image: NetworkImage(
+                        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShyQTVUKweEjyekXS8dOcHmXOtmqOFBEPUKQ&usqp=CAU',
+                      ),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
