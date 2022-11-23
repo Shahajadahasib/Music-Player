@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:music/provider.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 
 import 'package:provider/provider.dart';
 
@@ -132,30 +133,30 @@ class _AudioState extends State<Audio> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          IconButton(
-                            onPressed: () {
-                              if (isRepeat == false) {
-                                context
-                                    .read<AudioProvider>()
-                                    .advancedPlayer
-                                    .setReleaseMode(ReleaseMode.loop);
-                                setState(() {
-                                  isRepeat = true;
-                                  color = Colors.blue;
-                                });
-                              } else if (isRepeat == true) {
-                                context
-                                    .read<AudioProvider>()
-                                    .advancedPlayer
-                                    .setReleaseMode(ReleaseMode.release);
-                                color = Colors.blue;
-                                isRepeat = false;
-                              }
-                            },
-                            icon: const Icon(
-                              Icons.repeat_one,
-                            ),
-                          ),
+                          // IconButton(
+                          //   onPressed: () {
+                          //     if (isRepeat == false) {
+                          //       context
+                          //           .read<AudioProvider>()
+                          //           .advancedPlayer
+                          //           .setReleaseMode(ReleaseMode.loop);
+                          //       setState(() {
+                          //         isRepeat = true;
+                          //         color = Colors.blue;
+                          //       });
+                          //     } else if (isRepeat == true) {
+                          //       context
+                          //           .read<AudioProvider>()
+                          //           .advancedPlayer
+                          //           .setReleaseMode(ReleaseMode.release);
+                          //       color = Colors.blue;
+                          //       isRepeat = false;
+                          //     }
+                          //   },
+                          //   icon: const Icon(
+                          //     Icons.repeat_one,
+                          //   ),
+                          // ),
                           IconButton(
                             onPressed: () {
                               context
@@ -163,8 +164,16 @@ class _AudioState extends State<Audio> {
                                   .advancedPlayer
                                   .setPlaybackRate(1);
                             },
-                            icon: const Icon(
-                              Icons.slow_motion_video_outlined,
+                            icon: IconButton(
+                              onPressed: () {
+                                context.read<AudioProvider>().previousSong(
+                                    context
+                                        .read<AudioProvider>()
+                                        .currentSongIndex);
+                              },
+                              icon: Icon(
+                                Icons.skip_previous_outlined,
+                              ),
                             ),
                           ),
                           IconButton(
@@ -199,15 +208,15 @@ class _AudioState extends State<Audio> {
                               // );
                             },
                             icon: const Icon(
-                              Icons.forward_outlined,
+                              Icons.skip_next_outlined,
                             ),
                           ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.loop_outlined,
-                            ),
-                          ),
+                          // IconButton(
+                          //   onPressed: () {},
+                          //   icon: const Icon(
+                          //     Icons.loop_outlined,
+                          //   ),
+                          // ),
                         ],
                       ),
                     ],
@@ -220,8 +229,8 @@ class _AudioState extends State<Audio> {
             top: size.height * 0.12,
             left: (size.width - 150) / 2,
             right: (size.width - 150) / 2,
-            height: size.height * 0.16,
             child: Container(
+              padding: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
                 color: const Color(0xFFf2f2f2),
                 borderRadius: BorderRadius.circular(20),
@@ -230,27 +239,22 @@ class _AudioState extends State<Audio> {
                   width: 2,
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Container(
-                  decoration: BoxDecoration(
-                    //borderRadius: BorderRadius.circular(20),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 3,
-                    ),
-                    image: const DecorationImage(
-                      image: NetworkImage(
-                        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShyQTVUKweEjyekXS8dOcHmXOtmqOFBEPUKQ&usqp=CAU',
-                      ),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+              child: CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.amber,
+                child: QueryArtworkWidget(
+                  id: context
+                      .read<AudioProvider>()
+                      .audioList[context.read<AudioProvider>().currentSongIndex]
+                      .id,
+                  type: ArtworkType.AUDIO,
+                  artworkHeight: size.width * 0.26,
+                  artworkWidth: size.width * 0.26,
+                  artworkFit: BoxFit.cover,
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );

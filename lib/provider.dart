@@ -49,6 +49,8 @@ class AudioProvider with ChangeNotifier {
   }
 
   nextSong(int songindex) {
+    // log(currentSongIndex.toString());
+    // log(_audioList.length.toString());
     if (_currentSongIndex == _audioList.length - 1) {
       _currentSongIndex = 0;
     } else {
@@ -60,11 +62,26 @@ class AudioProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  previousSong(int songindex) {
+    if (_currentSongIndex == 0) {
+      _currentSongIndex = _audioList.length - 1;
+    } else {
+      _currentSongIndex = songindex - 1;
+    }
+    _position = Duration.zero;
+    _duration = Duration.zero;
+    playAudio();
+    notifyListeners();
+  }
+
   playAudio() async {
+    log(currentSongIndex.toString());
+    // log(_audioList.length.toString());
+    _isPLaying = true;
     await advancedPlayer.play(
       UrlSource(_audioList[_currentSongIndex].data),
     );
-    _isPLaying = true;
+
     await playerdurationchanged();
     await playerPositionchanged();
     notifyListeners();
